@@ -7,9 +7,11 @@ env = environs.Env()
 
 
 class Config:
-    SEARCH_ENDPOINT = env.str("SEARCH_ENDPOINT", "http://ld-*************-proxy-search-pub.lindorm.aliyuncs.com:30070")
+    SEARCH_ENDPOINT = env.str("SEARCH_ENDPOINT", "http://ld-************-proxy-search-pub.lindorm.aliyuncs.com:30070")
     SEARCH_USERNAME = env.str("SEARCH_USERNAME", "ADMIN")
-    SEARCH_PWD = env.str("SEARCH_PWD", "PWD")
+    SEARCH_PWD = env.str("SEARCH_PWD", "ADMIN")
+    UGC_INDEX_NAME = "ugc_index"
+    UGC_ROUTING_FIELD = "routing_field"
 
 
 class TestLindormVectorStore(AbstractVectorTest):
@@ -31,5 +33,31 @@ class TestLindormVectorStore(AbstractVectorTest):
         assert ids[0] == self.example_doc_id
 
 
-def test_lindorm_vector(setup_mock_redis):
-    TestLindormVectorStore().run_all_tests()
+class TestLindormVectorStoreUGC(AbstractVectorTest):
+    def __init__(self):
+        super().__init__()
+        self.vector = LindormVectorStore(
+            collection_name=self.collection_name,
+            config=LindormVectorStoreConfig(
+                hosts=Config.SEARCH_ENDPOINT,
+                username=Config.SEARCH_USERNAME,
+                password=Config.SEARCH_PWD,
+                ugc_index_name=Config.UGC_INDEX_NAME,
+                ugc_routing_field=Config.UGC_ROUTING_FIELD
+            ),
+            using_ugc=True,
+        )
+
+    def get_ids_by_metadata_field(self):
+        ids = self.vector.get_ids_by_metadata_field(key="doc_id", value=self.example_doc_id)
+        assert ids is not None
+        assert len(ids) == 1
+        assert ids[0] == self.example_doc_id
+
+
+# def test_lindorm_vector(setup_mock_redis):
+#     TestLindormVectorStore().run_all_tests()
+
+def test_lindorm_vector_ugc(setup_mock_redis):
+    TestLindormVectorStoreUGC().run_all_tests()
+

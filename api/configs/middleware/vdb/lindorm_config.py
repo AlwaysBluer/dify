@@ -21,3 +21,12 @@ class LindormConfig(BaseSettings):
         description="Lindorm password",
         default=None,
     )
+    LINDORM_UGC_INDEX_NAME: Optional[str] = Field(
+        description="Lindorm UGC index name. When using, all data will be store in a single index but you can search "
+                    "separately",
+        default=None,
+    )
+    LINDORM_UGC_ROUTING_FIELD: Optional[str] = Field(
+        description="Lindorm UGC routing field name, used in search index to do UGC full-text search",
+        default="routing_field"
+    )
